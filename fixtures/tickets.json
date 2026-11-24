@@ -1,0 +1,43 @@
+[
+  {
+    "ticket_code": "WT-LN-N-01-IN-001",
+    "lane_code": "LN-N-01-IN",
+    "bl_ref": "BL-2026-0101",
+    "vehicle_plate": "沪A·集8821",
+    "axle_weights": [{"axle": 1, "w": 8.2}, {"axle": 2, "w": 12.1}, {"axle": 3, "w": 11.8}, {"axle": 4, "w": 6.0}],
+    "gross_t": 38.1,
+    "status": "已裁定",
+    "created_at": "2026-01-08T09:12:00"
+  },
+  {
+    "ticket_code": "WT-LN-N-01-IN-002",
+    "lane_code": "LN-N-01-IN",
+    "bl_ref": "BL-2026-0103",
+    "vehicle_plate": "苏B·散5560",
+    "axle_weights": [{"axle": 1, "w": 9.0}, {"axle": 2, "w": 14.0}, {"axle": 3, "w": 14.5}, {"axle": 4, "w": 13.0}, {"axle": 5, "w": 8.0}],
+    "gross_t": 58.5,
+    "status": "旁路挂起",
+    "created_at": "2026-01-09T14:20:00"
+  },
+  {
+    "ticket_code": "WT-LN-S-01-IN-001",
+    "lane_code": "LN-S-01-IN",
+    "bl_ref": "BL-2026-0102",
+    "vehicle_plate": "浙C·箱2210",
+    "axle_weights": [{"axle": 1, "w": 6.5}, {"axle": 2, "w": 5.5}],
+    "gross_t": 12.0,
+    "status": "已放行",
+    "created_at": "2026-01-07T11:05:00"
+  },
+  {
+    "ticket_code": "WT-LN-N-02-IN-001",
+    "lane_code": "LN-N-02-IN",
+    "bl_ref": "BL-2026-0104",
+    "vehicle_plate": "鲁H·危3388",
+    "axle_weights": [{"axle": 1, "w": 10.0}, {"axle": 2, "w": 15.0}, {"axle": 3, "w": 16.0}],
+    "gross_t": 41.0,
+    "status": "已封闸",
+    "generation": 2,
+    "created_at": "2026-01-10T08:30:00"
+  }
+]

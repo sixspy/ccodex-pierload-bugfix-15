@@ -1,0 +1,7 @@
+[
+  {"lane_code": "LN-N-01-IN", "bridge_code": "WB-N-01", "direction": "进闸", "overload_threshold_t": 49, "side_lane_ref": "旁路甲", "status": "开放"},
+  {"lane_code": "LN-N-01-OUT", "bridge_code": "WB-N-01", "direction": "出闸", "overload_threshold_t": 49, "side_lane_ref": "旁路乙", "status": "开放"},
+  {"lane_code": "LN-N-02-IN", "bridge_code": "WB-N-02", "direction": "进闸", "overload_threshold_t": 38, "side_lane_ref": "北疏港旁路", "status": "开放"},
+  {"lane_code": "LN-S-01-IN", "bridge_code": "WB-S-01", "direction": "进闸", "overload_threshold_t": 45, "side_lane_ref": "南岸旁路", "status": "开放"},
+  {"lane_code": "LN-S-01-OUT", "bridge_code": "WB-S-01", "direction": "出闸", "overload_threshold_t": 45, "side_lane_ref": "南岸旁路", "status": "开放"}
+]

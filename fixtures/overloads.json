@@ -1,0 +1,11 @@
+[
+  {
+    "ticket_code": "WT-LN-N-01-IN-002",
+    "hold_key": "HOLD-WT-LN-N-01-IN-002",
+    "overweight_t": 9.5,
+    "threshold_t": 49,
+    "status": "开放",
+    "opened_at": "2026-01-09T14:21:00",
+    "side_lane_note": "旁路甲待驳载"
+  }
+]

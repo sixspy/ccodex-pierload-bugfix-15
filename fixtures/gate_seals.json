@@ -1,0 +1,10 @@
+[
+  {
+    "ticket_code": "WT-LN-N-02-IN-001",
+    "seal_ref": "GS-WT-LN-N-02-IN-001-G2",
+    "ticket_generation": 2,
+    "manifest": "票号=WT-LN-N-02-IN-001;提单=BL-2026-0104;车牌=鲁H·危3388;毛重=41.0t;闸代=2",
+    "status": "已封闸",
+    "sealed_at": "2026-01-10T09:00:00"
+  }
+]

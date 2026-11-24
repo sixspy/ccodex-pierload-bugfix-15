@@ -1,0 +1,6 @@
+[
+  {"bridge_code": "WB-N-01", "pier_zone": "北岸", "name": "北港一号地磅", "max_gross_t": 80, "axle_limit": 6, "status": "运行"},
+  {"bridge_code": "WB-N-02", "pier_zone": "北岸", "name": "北港集卡线", "max_gross_t": 60, "axle_limit": 5, "status": "运行"},
+  {"bridge_code": "WB-S-01", "pier_zone": "南岸", "name": "南岸外贸磅", "max_gross_t": 70, "axle_limit": 6, "status": "运行"},
+  {"bridge_code": "WB-S-02", "pier_zone": "南岸", "name": "南岸疏港磅", "max_gross_t": 55, "axle_limit": 4, "status": "维护"}
+]

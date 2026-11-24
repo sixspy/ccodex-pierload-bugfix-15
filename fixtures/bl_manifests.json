@@ -1,0 +1,6 @@
+[
+  {"bl_code": "BL-2026-0101", "cargo_desc": "卷板钢材", "declared_gross_t": 38.5, "vessel_voyage": "海天轮/1206"},
+  {"bl_code": "BL-2026-0102", "cargo_desc": "集装箱空箱", "declared_gross_t": 12.0, "vessel_voyage": "远洋轮/0881"},
+  {"bl_code": "BL-2026-0103", "cargo_desc": "散粮进口", "declared_gross_t": 52.3, "vessel_voyage": "丰收轮/0333"},
+  {"bl_code": "BL-2026-0104", "cargo_desc": "液化品槽车", "declared_gross_t": 41.0, "vessel_voyage": "海鲸轮/0199"}
+]
