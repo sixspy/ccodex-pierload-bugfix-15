@@ -11,6 +11,7 @@ from locks import release, require_lock
 from models import TicketIn
 from validators import (
     adjudicate_overload,
+    ticket_bypass_bit,
     validate_axle_count,
     validate_axle_weights,
     validate_gross_cap,
@@ -48,6 +49,8 @@ def list_tickets(authorization: AuthHeader = None, status: str | None = None):
         for r in rows:
             d = dict(r)
             d["axle_weights"] = json.loads(d["axle_weights"] or "[]")
+            # 第30号：五页同源旁路位，派生自正式票态列，不另立影子状态
+            d["bypass_pending"] = ticket_bypass_bit(d.get("status"))
             items.append(d)
         return {"items": items}
 
@@ -68,6 +71,7 @@ def get_ticket(ticket_id: int, authorization: AuthHeader = None):
             raise HTTPException(404, "过磅票不存在")
         data = dict(row)
         data["axle_weights"] = json.loads(data["axle_weights"] or "[]")
+        data["bypass_pending"] = ticket_bypass_bit(data.get("status"))
         holds = conn.execute(
             "SELECT * FROM overload_holds WHERE ticket_id=? ORDER BY id DESC",
             (ticket_id,),

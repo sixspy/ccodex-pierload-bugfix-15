@@ -1,6 +1,8 @@
 """码头锁与争用登记（写入路径嵌入）。"""
 from __future__ import annotations
 
+import sqlite3
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -15,24 +17,48 @@ class LockIn(BaseModel):
     action: str = "acquire"
 
 
+def log_contention(
+    conn, lock_key: str, actor: str, detail: str, action: str = "争用"
+) -> None:
+    """在调用方连接上落一条争用痕。
+
+    注意：必须由调用方在抛 409/回滚业务事务之前 conn.commit()，
+    否则“后到只留争用痕”会随整笔业务一起回滚掉（第30号修复点）。
+    """
+    conn.execute(
+        """INSERT INTO contention_log(lock_key,actor,action,detail,created_at)
+           VALUES (?,?,?,?,?)""",
+        (lock_key, actor, action, detail, now_iso()),
+    )
+
+
 def try_acquire(conn, lock_key: str, holder: str) -> bool:
     now = now_iso()
     row = conn.execute(
         "SELECT holder FROM pier_locks WHERE lock_key=?", (lock_key,)
     ).fetchone()
     if row is None:
-        conn.execute(
-            "INSERT INTO pier_locks(lock_key,holder,acquired_at) VALUES (?,?,?)",
-            (lock_key, holder, now),
-        )
+        try:
+            conn.execute(
+                "INSERT INTO pier_locks(lock_key,holder,acquired_at) VALUES (?,?,?)",
+                (lock_key, holder, now),
+            )
+        except sqlite3.IntegrityError:
+            # 两路会话 SELECT 都未见锁、并发 INSERT 撞主键：后到判负并留痕。
+            winner = conn.execute(
+                "SELECT holder FROM pier_locks WHERE lock_key=?", (lock_key,)
+            ).fetchone()
+            who = winner["holder"] if winner is not None else "先到会话"
+            log_contention(conn, lock_key, holder, f"抢锁竞态，持有者={who}")
+            return False
+        except sqlite3.OperationalError as exc:
+            # 锁等待超时等：按争用处理，绝不放行业务写。
+            log_contention(conn, lock_key, holder, f"锁忙判负：{exc}")
+            return False
         return True
     if row["holder"] == holder:
         return True
-    conn.execute(
-        """INSERT INTO contention_log(lock_key,actor,action,detail,created_at)
-           VALUES (?,?,?,?,?)""",
-        (lock_key, holder, "争用", f"持有者={row['holder']}", now),
-    )
+    log_contention(conn, lock_key, holder, f"持有者={row['holder']}")
     return False
 
 
@@ -45,6 +71,8 @@ def release(conn, lock_key: str, holder: str) -> None:
 
 def require_lock(conn, lock_key: str, holder: str) -> None:
     if not try_acquire(conn, lock_key, holder):
+        # 各嵌入写口都在业务写之前抢锁；此处先提交，确保争用痕跨业务回滚存活。
+        conn.commit()
         raise HTTPException(409, "争用：后到只记争用，不写业务")
 
 

@@ -28,6 +28,7 @@ export function createApi(getToken, onUnauthorized) {
     overloads: (st) => req(st ? `/api/overloads?status=${encodeURIComponent(st)}` : "/api/overloads"),
     openOverload: (d) => req("/api/overloads/open", { method: "POST", body: JSON.stringify(d) }),
     closeOverload: (d) => req("/api/overloads/close", { method: "POST", body: JSON.stringify(d) }),
+    rejectOverload: (d) => req("/api/overloads/reject", { method: "POST", body: JSON.stringify(d) }),
     gateReleases: () => req("/api/gate/releases"),
     releaseGate: (d) => req("/api/gate/release", { method: "POST", body: JSON.stringify(d) }),
     seals: () => req("/api/seals"),

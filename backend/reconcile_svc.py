@@ -4,9 +4,32 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 
 from auth import AuthHeader, require_user
-from validators import validate_bl_match
+from validators import (
+    adjudication_label,
+    ticket_bypass_bit,
+    validate_bl_match,
+)
 
 router = APIRouter(tags=["reconcile"])
+
+
+def _adjudication_summary(ticket_rows: list[dict]) -> dict:
+    """第30号·回态修辰：对账卡片的裁定归集。
+
+    唯一来源是正式票态列 weigh_tickets.status（source 明示），
+    不读任何影子/草稿回态，避免“影子未晋升、对账当已裁定”的双口径。
+    """
+    statuses = [t["status"] for t in ticket_rows]
+    side_pending = sum(1 for s in statuses if ticket_bypass_bit(s))
+    all_adjudicated = bool(statuses) and side_pending == 0 and all(
+        s in ("已裁定", "已放行", "已封闸") for s in statuses
+    )
+    return {
+        "source": "weigh_tickets.status",
+        "all_adjudicated": all_adjudicated,
+        "side_pending": side_pending,
+        "label": adjudication_label(statuses) if statuses else "无过磅票",
+    }
 
 
 @router.get("/api/reconcile")
@@ -55,7 +78,21 @@ def _reconcile_bl(conn, bl_code: str) -> dict:
             "balanced": False,
             "reason": "无过磅票",
             "tickets": [],
+            "adjudication": {
+                "source": "weigh_tickets.status",
+                "all_adjudicated": False,
+                "side_pending": 0,
+                "label": "无过磅票",
+            },
+            "all_adjudicated": False,
+            "adjudication_label": "无过磅票",
         }
+    ticket_items = []
+    for t in tickets:
+        d = dict(t)
+        d["bypass_pending"] = ticket_bypass_bit(d.get("status"))
+        ticket_items.append(d)
+    adjudication = _adjudication_summary(ticket_items)
     ticket_sum = round(sum(float(t["gross_t"]) for t in tickets), 3)
     declared = float(bl["declared_gross_t"])
     matched = validate_bl_match(declared, ticket_sum, tolerance=0.1)
@@ -73,8 +110,12 @@ def _reconcile_bl(conn, bl_code: str) -> dict:
         "balanced": matched,
         "proof_ready": proof_ok,
         "seal_count": len(seal_rows),
-        "tickets": [dict(t) for t in tickets],
+        "tickets": ticket_items,
         "seals": [dict(s) for s in seal_rows],
+        "adjudication": adjudication,
+        # 顶层同义字段，方便对账卡片/总览直接绑定
+        "all_adjudicated": adjudication["all_adjudicated"],
+        "adjudication_label": adjudication["label"],
     }
 
 
@@ -112,6 +153,8 @@ def proof_ticket(ticket_code: str, authorization: AuthHeader = None):
         return {
             "ticket_code": ticket_code,
             "bl_ref": ticket["bl_ref"],
+            "ticket_status": ticket["status"],
+            "bypass_pending": ticket_bypass_bit(ticket["status"]),
             "gross_t": ticket["gross_t"],
             "manifest_matches_bl": manifest_match,
             "has_seal": seal is not None,

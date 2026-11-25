@@ -46,6 +46,14 @@ class OverloadCloseIn(BaseModel):
     note: str = ""
 
 
+class OverloadRejectIn(BaseModel):
+    """第30号驳回写口：hold_id 或 ticket_id 二选一即可定位同票开放挂起。"""
+
+    hold_id: int | None = None
+    ticket_id: int | None = None
+    note: str = ""
+
+
 class GateReleaseIn(BaseModel):
     ticket_id: int
     officer: str = "闸口员"

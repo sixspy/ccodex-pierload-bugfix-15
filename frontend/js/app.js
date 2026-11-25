@@ -82,6 +82,10 @@ createApp({
     const releasableTickets = computed(() =>
       tickets.value.filter((t) => t.status === "已裁定")
     );
+    // 第30号：放行页灰因同源可见——旁路挂起票（bypass_pending 派生位）
+    const bypassBlockedTickets = computed(() =>
+      tickets.value.filter((t) => t.bypass_pending || t.status === "旁路挂起")
+    );
     const sealableTickets = computed(() =>
       tickets.value.filter((t) => ["已裁定","已放行"].includes(t.status))
     );
@@ -199,8 +203,13 @@ createApp({
     async function closeOverload(holdId) {
       clearFlash();
       try {
-        await api.closeOverload({ hold_id: holdId, note: "前端闭环" });
-        flashOk("挂起已闭"); await refresh();
+        const r = await api.closeOverload({ hold_id: holdId, note: "前端驳回回态" });
+        if (r.ticket_adjudicated && r.ticket_status === "已裁定") {
+          flashOk(`驳回成功，主票状态已回写为「${r.ticket_status}」，旁路位抹除`);
+        } else {
+          flashOk(`挂起已闭，票态=${r.ticket_status || "仍有开放挂起"}`);
+        }
+        await refresh();
       } catch (e) { flashErr(e); }
     }
     async function releaseGate() {
@@ -266,7 +275,7 @@ createApp({
       reconOne, reconAllItems, proofOne, reconCode, proofCode,
       bridgeForm, laneForm, ticketForm, overloadOpenForm, gateForm, sealForm,
       blForm, lineageForm, customsForm, craneForm,
-      adjudicableTickets, releasableTickets, sealableTickets,
+      adjudicableTickets, releasableTickets, bypassBlockedTickets, sealableTickets,
       login, logout, refresh,
       fmtT, ticketClass, shortText,
       createBridge, loadBridgeDetail, createLane, createTicket, loadTicketDetail, selectTicket,

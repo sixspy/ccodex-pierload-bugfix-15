@@ -477,6 +477,18 @@ def dashboard_stats(conn: sqlite3.Connection) -> dict:
         """SELECT COUNT(*) c FROM weigh_tickets
            WHERE status='旁路挂起'"""
     ).fetchone()["c"]
+    # 第30号·回态修辰：总览与其余四页同源票态。adjudicated 为驳回回态落定数。
+    adjudicated = conn.execute(
+        """SELECT COUNT(*) c FROM weigh_tickets
+           WHERE status='已裁定'"""
+    ).fetchone()["c"]
+    side_pending_codes = [
+        r["ticket_code"]
+        for r in conn.execute(
+            """SELECT ticket_code FROM weigh_tickets
+               WHERE status='旁路挂起' ORDER BY id"""
+        ).fetchall()
+    ]
     return {
         "bridges": bridges,
         "lanes": lanes,
@@ -486,6 +498,8 @@ def dashboard_stats(conn: sqlite3.Connection) -> dict:
         "gate_seals": sealed,
         "bl_manifests": bl_count,
         "side_pending": pending,
+        "adjudicated": adjudicated,
+        "side_pending_codes": side_pending_codes,
         "stubs": stubs,
         "meta": PRODUCT_META,
     }

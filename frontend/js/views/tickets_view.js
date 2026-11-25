@@ -30,7 +30,9 @@ export const ticketsViewTemplate = `
         <td>{{ t.lane_code }}</td>
         <td>{{ t.bl_ref }}</td>
         <td>{{ fmtT(t.gross_t) }}</td>
-        <td><span class="badge" :class="ticketClass(t.status)">{{ t.status }}</span></td>
+        <td><span class="badge" :class="ticketClass(t.status)">{{ t.status }}</span>
+          <span v-if="t.bypass_pending" class="badge fail">旁路位</span>
+        </td>
         <td>{{ t.generation }}</td>
         <td><button class="mini-btn" @click.stop="loadTicketDetail(t.id)">详情</button></td>
       </tr>

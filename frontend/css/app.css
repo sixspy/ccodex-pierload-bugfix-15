@@ -156,3 +156,17 @@ input:focus, select:focus, textarea:focus {
 .recon-ok { color: var(--ok); }
 .table-wrap { overflow-x: auto; max-width: 100%; }
 .harbor-main .panel + .panel { margin-top: 14px; }
+
+/* 第30号·回态修辰：五页同源票态卡片 */
+.hero-card.card-pass { border-color: var(--ok); }
+.hero-card.card-pass .n { color: var(--ok); }
+.hero-card.card-fail { border-color: var(--bad); }
+.hero-card.card-fail .n { color: var(--bad); }
+.adjudication-card {
+  margin-top: 10px; padding: 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--bg-slate);
+}
+.adjudication-card.pass { border-color: var(--ok); }
+.adjudication-card.fail { border-color: var(--bad); }
+.adjudication-card .adj-label { margin: 6px 0; }
+button:disabled { opacity: 0.45; cursor: not-allowed; }

@@ -3,6 +3,41 @@ from __future__ import annotations
 
 from fastapi import HTTPException
 
+# 第30号·回态修辰：五页（超重/过磅/放行/对账/总览）同源票态口径。
+# 「旁路位」只认 weigh_tickets.status == 旁路挂起；驳回同事务回写为已裁定。
+BYPASS_PENDING_STATUS = "旁路挂起"
+ADJUDICATED_STATUS = "已裁定"
+# 已完成裁定并继续下流的票态，对账均按“已裁定（含已放行/已封闸）”归集。
+ADJUDICATED_LIKE_STATUSES = ("已裁定", "已放行", "已封闸")
+# 驳回回态允许落定的目标票态。
+RETURN_STATE_STATUS = "已裁定"
+
+
+def is_bypass_pending(status: str | None) -> bool:
+    """票是否仍挂在旁路（旁路位未抹掉）。唯一判定口径。"""
+    return status == BYPASS_PENDING_STATUS
+
+
+def ticket_bypass_bit(status: str | None) -> bool:
+    """对外派生的显式旁路位：True=仍旁路挂起，False=已回态/未挂起。"""
+    return is_bypass_pending(status)
+
+
+def is_adjudicated_state(status: str | None) -> bool:
+    """正式票态列是否已处于裁定之后（含放行/封闸）。"""
+    return status in ADJUDICATED_LIKE_STATUSES
+
+
+def adjudication_label(statuses: list[str]) -> str:
+    """对账卡片/总览共用的裁定归集标签，只来源于正式票态列。"""
+    if any(is_bypass_pending(s) for s in statuses):
+        return BYPASS_PENDING_STATUS
+    if statuses and all(is_adjudicated_state(s) for s in statuses):
+        return ADJUDICATED_STATUS
+    if statuses and len(set(statuses)) == 1:
+        return statuses[0]
+    return "票态不一"
+
 
 def validate_lane_open(lane: dict) -> None:
     if lane["status"] not in ("开放", "维护"):

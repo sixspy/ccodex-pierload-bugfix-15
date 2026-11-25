@@ -11,8 +11,15 @@ export const gateViewTemplate = `
     <div><label>值班员</label><input v-model="gateForm.officer"/></div>
   </div>
   <div class="actions">
-    <button @click="releaseGate">确认放行</button>
+    <button @click="releaseGate" :disabled="!gateForm.ticket_id">确认放行</button>
     <button class="secondary" @click="refresh">刷新</button>
+  </div>
+  <!-- 第30号：按钮灰掉的同源解释：这些票主票状态列仍是旁路挂起，须先超重页驳回回态 -->
+  <div v-if="bypassBlockedTickets.length" class="detail-box" style="border-color:#c0392b">
+    <p class="bad" style="font-weight:600">以下 {{ bypassBlockedTickets.length }} 张票仍旁路挂起，放行按钮对其不可选：</p>
+    <p v-for="t in bypassBlockedTickets" :key="t.id" class="bad mono">
+      · {{ t.ticket_code }}（{{ t.status }}）— 请先在「超重」页点“驳回回态”
+    </p>
   </div>
   <table class="data-table">
     <thead><tr><th>放行号</th><th>票号</th><th>车道</th><th>值班员</th><th>时间</th></tr></thead>

@@ -7,7 +7,11 @@ from auth import AuthHeader, require_user, require_writer
 from db import connect, now_iso, write_audit
 from locks import release, require_lock
 from models import GateReleaseIn
-from validators import validate_no_open_overload, validate_ticket_mutable
+from validators import (
+    is_bypass_pending,
+    validate_no_open_overload,
+    validate_ticket_mutable,
+)
 
 router = APIRouter(tags=["gate"])
 
@@ -43,8 +47,12 @@ def release_gate(body: GateReleaseIn, authorization: AuthHeader = None):
             validate_ticket_mutable(dict(ticket))
             if ticket["status"] not in ("已裁定", "旁路挂起"):
                 raise HTTPException(409, "票态不允许放行")
-            if ticket["status"] == "旁路挂起":
-                raise HTTPException(409, "旁路挂起须先闭环")
+            if is_bypass_pending(ticket["status"]):
+                # 第30号：驳回未回态前一律不放行；回态后同源下拉自然恢复。
+                raise HTTPException(
+                    409,
+                    f"旁路挂起须先闭环并驳回回态（当前票态={ticket['status']}）",
+                )
             validate_no_open_overload(conn, body.ticket_id)
             exists = conn.execute(
                 "SELECT id FROM gate_releases WHERE ticket_id=? AND status='已放行'",
@@ -82,6 +90,8 @@ def release_gate(body: GateReleaseIn, authorization: AuthHeader = None):
                 "id": cur.lastrowid,
                 "release_ref": ref,
                 "status": "已放行",
+                "ticket_id": body.ticket_id,
+                "ticket_status": "已放行",
             }
         finally:
             release(conn, lock_key, user)
